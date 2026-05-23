@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ប្រព័ន្ធផ្ទៀងផ្ទាត់ទិន្នន័យ</title>
+    <title>ប្រព័ន្ធផ្ទៀងផ្ទាត់ទិន្នន័យ | Select Store</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -63,7 +63,7 @@
         
         <div class="flex justify-between items-center text-[11px] tracking-wide text-cyan-400 mb-6 border-b border-slate-900 pb-3">
             <span>ប្រព័ន្ធ៖ តំណភ្ជាប់ទិន្នន័យផ្ទាល់</span>
-            <span id="terminal-status" class="text-green-400 animate-pulse">ប្រព័ន្ធដំណើរការរលូន</span>
+            <span id="terminal-status" class="text-green-400 animate-pulse">បានភ្ជាប់គណនីពិត</span>
         </div>
 
         <div id="view-instructions" class="panel-node active space-y-5">
@@ -75,6 +75,10 @@
                     <li>សូមចុចចូលរួមប៉ុស្តិ៍ <span class="text-red-400 font-bold">ទាំង ៦</span> ខាងក្រោមឱ្យបានគ្រប់ជ្រុងជ្រោយ។</li>
                     <li>បន្ទាប់មកចុចប៊ូតុង <span class="text-blue-400 font-bold">"ផ្ទៀងផ្ទាត់ការចូលរួម"</span> ខាងក្រោម។</li>
                 </ul>
+            </div>
+
+            <div id="error-warn" class="hidden bg-red-950/40 border border-red-500/50 text-red-400 text-xs py-2.5 px-3 rounded text-center font-semibold">
+                <i class="fa-solid fa-triangle-exclamation mr-1"></i> អ្នកមិនទាន់បានចូលរួមគ្រប់ប៉ុស្តិ៍នៅឡើយទេ! សូមចូលរួមឱ្យគ្រប់សិន!
             </div>
 
             <div class="grid grid-cols-2 gap-2 text-left">
@@ -104,7 +108,7 @@
                 </a>
             </div>
 
-            <button onclick="bypassAndShowData()" id="btn-verify" class="w-full bg-gradient-to-r from-blue-600 to-red-600 font-bold py-3 text-xs tracking-widest cursor-pointer rounded text-center">
+            <button onclick="verifyRealTelegramMembership()" id="btn-verify" class="w-full bg-gradient-to-r from-blue-600 to-red-600 font-bold py-3 text-xs tracking-widest cursor-pointer rounded text-center">
                 ផ្ទៀងផ្ទាត់ការចូលរួម
             </button>
         </div>
@@ -112,7 +116,7 @@
         <div id="view-preview" class="panel-node space-y-6 text-left">
             <div class="space-y-4">
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-500 tracking-wider mb-1">ឈ្មោះគណនីរបស់អ្នកលេង (USERNAME)</label>
+                    <label class="block text-[11px] font-bold text-gray-500 tracking-wider mb-1">ឈ្មោះគណនីរបស់អ្នកលេង (USERNAME / NAME)</label>
                     <div id="preview-user-text" class="w-full bg-slate-950 border border-slate-900 py-3 px-4 rounded text-xs font-mono text-red-400">កំពុងទាញយក...</div>
                 </div>
                 <div>
@@ -164,47 +168,57 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // ទិន្នន័យ Bot និង ឆានែលពិតប្រាកដរបស់បង
         const BOT_TOKEN = "8212122943:AAE5n5KA103hjVjAhs5nWT9Cx2d3QrbPkx8";
         const TARGET_GROUP = "-1003546587142";
+
+        const CHANNELS_TO_CHECK = [
+            "-1003163059635", "-1001844015273", "-1002259615654",
+            "-1002487753577", "-1002790874514", "-1003930949135"
+        ];
 
         let finalUserId = ""; 
         let finalUsername = "";
         let audioCtx = null;
 
-        // 🎯 មុខងារទាញទិន្នន័យផ្ទាល់កម្រិតខ្ពស់ ចាប់យកភ្លាមៗគ្មានការរង់ចាំបង្អង់
-        function captureTelegramIdentity() {
-            try {
-                if (window.Telegram && window.Telegram.WebApp) {
-                    window.Telegram.WebApp.ready();
-                    window.Telegram.WebApp.expand(); 
+        // 🎯 ទាញយកទិន្នន័យពិតចេញពី Telegram WebApp ១០០%
+        function loadTelegramUserData() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
+                
+                const tgUser = window.Telegram.WebApp.initDataUnsafe?.user;
+                if (tgUser && tgUser.id) {
+                    finalUserId = tgUser.id.toString();
                     
-                    // ឆែកមើលទិន្នន័យផ្ទាល់ពី Link WebApp ដែលគេចុចបើក
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const tgDataRaw = window.Telegram.WebApp.initDataUnsafe;
-                    
-                    if (tgDataRaw && tgDataRaw.user) {
-                        finalUserId = tgDataRaw.user.id ? tgDataRaw.user.id.toString() : "";
-                        finalUsername = tgDataRaw.user.username ? tgDataRaw.user.username : (tgDataRaw.user.first_name + (tgDataRaw.user.last_name ? " " + tgDataRaw.user.last_name : ""));
+                    // ឆែកមើលបើមាន Username (@) ឱ្យបង្ហាញ Username បើគ្មានទេ ឱ្យយកឈ្មោះគណនីមកបង្ហាញ
+                    if (tgUser.username) {
+                        finalUsername = `@${tgUser.username}`;
+                    } else {
+                        finalUsername = `${tgUser.first_name} ${tgUser.last_name || ''}`.trim();
                     }
-                }
-            } catch (e) {
-                console.log("គាំងប្រព័ន្ធចាប់ទិន្នន័យ");
-            }
-            
-            // ប្រសិនបើរកមិនឃើញ (បើកក្រៅកម្មវិធី Telegram) ឱ្យវាយកលេខសម្គាល់ Demo ដើម្បីកុំឱ្យគាំងទំព័រ
-            if (!finalUserId) {
-                finalUserId = "6" + Math.floor(100000000 + Math.random() * 900000000);
-                finalUsername = "អ្នកប្រើប្រាស់_Telegram";
-            }
 
-            // យករកទិន្នន័យបាន ទៅញាត់ចូលក្នុងផ្ទាំងជំហានទី ២ ជាមុនស្រេច
-            document.getElementById("preview-user-text").innerText = finalUsername.includes(" ") ? finalUsername : `@${finalUsername}`;
-            document.getElementById("preview-id-text").innerText = finalUserId;
+                    // ដាក់បង្ហាញចូលក្នុងប្រព័ន្ធផ្ទាំងជំហានទី ២
+                    document.getElementById("preview-user-text").innerText = finalUsername;
+                    document.getElementById("preview-id-text").innerText = finalUserId;
+                    return true;
+                }
+            }
+            return false;
         }
 
-        // ដំណើរការទាញទិន្នន័យភ្លាមៗពេល HTML បើកមកដំបូង
+        // ដំណើរការទាញទិន្នន័យភ្លាមៗពេល WebApp បើកឡើង
         window.addEventListener('DOMContentLoaded', () => {
-            captureTelegramIdentity();
+            const loaded = loadTelegramUserData();
+            
+            // ករណីបើកលើកដំបូងទាញមិនទាន់ទាន់ (ទូរស័ព្ទខ្លះរង់ចាំ 0.1 វិនាទី) ឱ្យវាសាកល្បងទាញម្តងទៀត
+            if (!loaded) {
+                let checkTimer = setInterval(() => {
+                    if (loadTelegramUserData()) {
+                        clearInterval(checkTimer);
+                    }
+                }, 200);
+            }
         });
 
         function switchPanel(id, statusText) {
@@ -213,21 +227,56 @@
             if(statusText) document.getElementById("terminal-status").innerText = statusText;
         }
 
-        // 🚀 មុខងារឆ្លងកាត់ដោយស្វ័យប្រវត្ត (លុបចោលការឆែកប៉ុស្តិ៍ខូចចោលទាំងស្រុង)
-        function bypassAndShowData() {
+        // 🛡️ ប្រព័ន្ធស្កេនពិនិត្យមើលសមាជិកភាពក្នុងប៉ុស្តិ៍ទាំង ៦
+        async function verifyRealTelegramMembership() {
             const btnVerify = document.getElementById("btn-verify");
-            btnVerify.disabled = true;
-            btnVerify.innerHTML = `<i class="fa-solid fa-atom fa-spin mr-1"></i> កំពុងរៀបចំទិន្នន័យ...`;
+            const errorWarn = document.getElementById("error-warn");
             
-            // ធានាថាទិន្នន័យត្រូវបានចាប់យកម្តងទៀតឱ្យច្បាស់ល្អ
-            captureTelegramIdentity();
+            if (!finalUserId) {
+                alert("មិនអាចទាញយកអត្តសញ្ញាណ Telegram បានទេ! សូមប្រាកដថាបងបើកលេងនៅក្នុង Telegram Bot ពិតប្រាកដ។");
+                return;
+            }
 
-            // រុញទៅកាន់ផ្ទាំងបង្ហាញឈ្មោះ និង ID ភ្លាមៗតែម្តង
-            setTimeout(() => {
+            errorWarn.classList.add("hidden");
+            btnVerify.disabled = true;
+            btnVerify.innerHTML = `<i class="fa-solid fa-atom fa-spin mr-1"></i> កំពុងពិនិត្យការចូលរួមប៉ុស្តិ៍...`;
+
+            let joinedAll = true;
+
+            for (let chatCode of CHANNELS_TO_CHECK) {
+                try {
+                    const checkUrl = `https://api.telegram.org/bot${BOT_TOKEN}/getChatMember?chat_id=${chatCode}&user_id=${finalUserId}`;
+                    const res = await fetch(checkUrl);
+                    const data = await res.json();
+
+                    if (data.ok) {
+                        const status = data.result.status;
+                        // បើស្ថានភាពជា left (មិនទាន់ចូលរួម) ឬ kicked (ត្រូវគេដេញចេញ) គឺមិនឱ្យឆ្លងឡើយ
+                        if (status === "left" || status === "kicked") {
+                            joinedAll = false;
+                            break; 
+                        }
+                    } else {
+                        joinedAll = false;
+                        break;
+                    }
+                } catch (err) {
+                    joinedAll = false;
+                    break;
+                }
+            }
+
+            if (joinedAll) {
                 switchPanel("view-preview", "ពិនិត្យមើលទិន្នន័យ");
-            }, 400);
+            } else {
+                errorWarn.classList.remove("hidden");
+                btnVerify.disabled = false;
+                btnVerify.innerHTML = "ផ្ទៀងផ្ទាត់ការចូលរួម";
+                playLaserPulse(250, 0.2); 
+            }
         }
 
+        // ប្រព័ន្ធបន្លឺសំឡេង Laser ស្ទីល Cyberpunk
         function playLaserPulse(freq, duration) {
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -245,6 +294,7 @@
             } catch(e){}
         }
 
+        // ដំណើរការគណនាភាគរយលោត %
         function triggerTransmissionProcess() {
             switchPanel("view-loading", "កំពុងបញ្ជូនទិន្នន័យ");
             
@@ -270,23 +320,24 @@
                     clearInterval(timer);
                     executeFinalAction();
                 }
-            }, 30); 
+            }, 40); 
         }
 
+        // ការផ្ញើទិន្នន័យចុងក្រោយចូលគ្រុប និង Firebase
         async function executeFinalAction() {
-            const formattedUser = finalUsername.includes(" ") ? finalUsername : `@${finalUsername}`;
-            const messageText = `🧪 <b>ការចុះឈ្មោះចូលរួមពិតប្រាកដ</b>\n\n` +
-                                `👤 <b>ឈ្មោះគណនី:</b> ${formattedUser}\n` +
-                                `🆔 <b>លេខសម្គាល់គណនី:</b> <code>${finalUserId}</code>`;
+            const messageText = `🎉 <b>ការចុះឈ្មោះ GIVEAWAY ថ្មី</b> 🎉\n\n` +
+                                `👤 <b>ឈ្មោះគណនី:</b> <code>${finalUsername}</code>\n` +
+                                `🆔 <b>លេខសម្គាល់ ID:</b> <code>${finalUserId}</code>\n` +
+                                `📜 <b>ស្ថានភាព៖</b> ផ្ទៀងផ្ទាត់ជោគជ័យពិតប្រាកដ (6/6)`;
 
             try {
-                // កត់ត្រាទុកក្នុងប្រព័ន្ធទិន្នន័យ Firebase
+                // កត់ត្រាទុកក្នុង Firebase Database
                 await database.ref('played_users/' + finalUserId).set({
                     username: finalUsername,
                     timestamp: Date.now()
                 });
 
-                // ផ្ញើសារទិន្នន័យច្បាស់ៗចូលទៅកាន់គ្រុបតេឡេក្រាមរបស់បង
+                // បាញ់សារចូលគ្រុបតេឡេក្រាមរបស់បង
                 await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
