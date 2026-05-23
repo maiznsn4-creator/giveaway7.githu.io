@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Cyber Lab - Real Verification</title>
+    <title>Cyber Lab Terminal - Final Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,7 +30,7 @@
             pointer-events: none;
         }
         .lab-mainframe {
-            background: rgba(5, 3, 10, 0.95);
+            background: rgba(5, 3, 10, 0.96);
             backdrop-filter: blur(30px);
             -webkit-backdrop-filter: blur(30px);
             border: 2px solid transparent;
@@ -62,19 +62,27 @@
         <div class="pulse-line"></div>
         
         <div class="flex justify-between items-center text-[10px] font-mono tracking-widest text-cyan-400 mb-6 border-b border-slate-900 pb-3">
-            <span>SYS: AUTH NODE</span>
-            <span id="terminal-status" class="text-red-400 animate-pulse">CHECKING USER...</span>
+            <span>SYS: TELEGRAM CORE</span>
+            <span id="terminal-status" class="text-red-400 animate-pulse">VERIFYING NETWORK...</span>
+        </div>
+
+        <div id="view-browser-block" class="panel-node text-center py-8 space-y-4">
+            <i class="fa-solid fa-robot text-5xl text-amber-500 drop-shadow-[0_0_15px_#f59e0b]"></i>
+            <h2 class="text-lg font-bold text-amber-500 tracking-wide">សូមបើកនៅក្នុង TELEGRAM APP</h2>
+            <p class="text-xs text-gray-400 max-w-xs mx-auto leading-relaxed">
+                ប្រព័ន្ធសុវត្ថិភាពមន្ទីរពិសោធន៍អនុញ្ញាតឱ្យបើកដំណើរការ <span class="text-amber-400 font-bold">ផ្តាច់មុខតែនៅក្នុងកម្មវិធី Telegram</span> តែប៉ុណ្ណោះ ដើម្បីទាញយកទិន្នន័យពិតប្រាកដ។
+            </p>
         </div>
 
         <div id="view-played" class="panel-node text-center py-8 space-y-4">
-            <i class="fa-solid fa-radiation text-5xl text-red-500 drop-shadow-[0_0_15px_#ef4444] animate-bounce"></i>
+            <i class="fa-solid fa-ban text-5xl text-red-500 drop-shadow-[0_0_15px_#ef4444]"></i>
             <h2 class="text-xl font-bold text-red-500 tracking-wide">អ្នកលេងរួចហើយ!</h2>
             <p class="text-xs text-gray-400 max-w-xs mx-auto leading-relaxed">
                 គណនីរបស់អ្នកមាននៅក្នុង Firebase រួចហើយ។ ប្រព័ន្ធអនុញ្ញាតឱ្យលេងបានតែ <span class="text-red-400 font-bold">១ដងគត់</span>។
             </p>
         </div>
 
-        <div id="view-instructions" class="panel-node active space-y-5">
+        <div id="view-instructions" class="panel-node space-y-5">
             <div class="bg-blue-950/20 border-l-4 border-blue-500 bg-slate-950/50 p-4 rounded-r-lg space-y-2 text-left">
                 <h3 class="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
                     <i class="fa-solid fa-circle-info"></i> របៀបចូលរួមយក Telegram Premium 1 Month:
@@ -82,7 +90,6 @@
                 <ul class="text-[11px] text-gray-300 space-y-1.5 list-decimal pl-4 leading-relaxed">
                     <li>សូមចុចចូលរួម <span class="text-red-400 font-bold">Channel ទាំង ៦</span> ខាងក្រោមឱ្យបានគ្រប់។</li>
                     <li>បន្ទាប់មកចុចប៊ូតុង <span class="text-blue-400 font-bold">"ផ្ទៀងផ្ទាត់ការចូលរួម"</span>។</li>
-                    <li>បើមិនទាន់ចូលរួមគ្រប់ទេ ប្រព័ន្ធនឹង <span class="text-red-400 font-bold">មិនអនុញ្ញាត</span> ឱ្យលេងឡើយ។</li>
                 </ul>
             </div>
 
@@ -144,12 +151,10 @@
                 <div class="absolute inset-0 border-2 border-dashed border-cyan-500/40 rounded-full animate-[spin_8s_linear_infinite]"></div>
                 <div id="counter-pct" class="text-3xl font-black text-cyan-400 tracking-tighter drop-shadow-[0_0_15px_rgba(34,211,238,0.6)]">0%</div>
             </div>
-            
             <div class="space-y-1">
                 <div class="text-[10px] text-gray-400 tracking-widest uppercase animate-pulse">TRANSMITTING DATA STREAMS...</div>
                 <div class="text-[9px] text-red-400 font-mono tracking-wide" id="loading-status-text">CONNECTING TO LAB NODE...</div>
             </div>
-            
             <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden p-[1px] border border-slate-900">
                 <div id="progress-indicator" class="h-full w-0 bg-gradient-to-r from-red-500 to-blue-500 shadow-[0_0_10px_#3b82f6] transition-all duration-75"></div>
             </div>
@@ -158,7 +163,7 @@
     </div>
 
     <script>
-        // កូដភ្ជាប់ Firebase Realtime Database
+        // ភ្ជាប់ប្រព័ន្ធទិន្នន័យ Firebase Database របស់បង
         const firebaseConfig = {
             apiKey: "AIzaSyD0CoOErw8unJ2lGF3K4BqTAnq0eFq3ycI",
             authDomain: "myessayapp.firebaseapp.com",
@@ -175,38 +180,37 @@
         const TARGET_GROUP = "-1003546587142";
         const REDIRECT_URL = "https://t.me/c/3546587142"; 
 
-        // បញ្ជី ID របស់ Channel ទាំង ៦ ដែលត្រូវឆែកពិតប្រាកដ
         const CHANNELS_TO_CHECK = [
-            "-1003163059635", // Elcystoree
-            "-1001844015273", // Select Store 2
-            "-1002259615654", // Select Store 1
-            "-1002487753577", // Select Store 4
-            "-1002790874514", // Select Store 19
-            "-1003930949135"  // Starstore Ch1
+            "-1003163059635", "-1001844015273", "-1002259615654",
+            "-1002487753577", "-1002790874514", "-1003930949135"
         ];
 
-        let finalUserId = "LOCAL_DEV_TEST_99"; // លេខសាកល្បងបើកលើ Browser ធម្មតា
-        let finalUsername = "Tester_User";
+        let finalUserId = null; 
+        let finalUsername = null;
         let audioCtx = null;
 
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe?.user) {
-            const user = window.Telegram.WebApp.initDataUnsafe.user;
-            finalUserId = user.id.toString();
-            finalUsername = user.username || user.first_name || "Unknown";
-        }
-
         window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById("preview-user-text").innerText = `@${finalUsername}`;
-            document.getElementById("preview-id-text").innerText = finalUserId;
+            // 🛡️ ឆែកមើលថាតើអ្នកលេងបើកក្នុង Telegram App មែនឬអត់
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe?.user) {
+                const user = window.Telegram.WebApp.initDataUnsafe.user;
+                finalUserId = user.id.toString();
+                finalUsername = user.username || user.first_name || "Unknown";
 
-            // ឆែកមើលក្នុង Firebase ជាមុនសិន
-            database.ref('played_users/' + finalUserId).once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    switchPanel("view-played", "DENIED");
-                } else {
-                    switchPanel("view-instructions", "SECURITY CHECK");
-                }
-            });
+                document.getElementById("preview-user-text").innerText = `@${finalUsername}`;
+                document.getElementById("preview-id-text").innerText = finalUserId;
+
+                // ឆែកមើលប្រព័ន្ធការពារស្ទួនក្នុង Firebase
+                database.ref('played_users/' + finalUserId).once('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        switchPanel("view-played", "DENIED");
+                    } else {
+                        switchPanel("view-instructions", "SECURITY CHECK");
+                    }
+                });
+            } else {
+                // បើបើកក្រៅ Telegram (ដូចជាលើ Safari, Chrome ធម្មតា) គឺចាក់សោចោលភ្លាម
+                switchPanel("view-browser-block", "ACCESS DENIED");
+            }
         });
 
         function switchPanel(id, statusText) {
@@ -215,26 +219,17 @@
             if(statusText) document.getElementById("terminal-status").innerText = statusText;
         }
 
-        // 🛡️ ប្រព័ន្ធ API ទៅឆែកមើលក្នុង Telegram Server ពិតប្រាកដ ១០០%
+        // 🛡️ ប្រព័ន្ធ API ឆែកការ Join ក្នុង Telegram Server ពិតប្រាកដ
         async function verifyRealTelegramMembership() {
             const btnVerify = document.getElementById("btn-verify");
             const errorWarn = document.getElementById("error-warn");
             
             errorWarn.classList.add("hidden");
             btnVerify.disabled = true;
-            btnVerify.innerHTML = `<i class="fa-solid fa-atom fa-spin mr-1"></i> កំពុងស្កេនទិន្នន័យពិតប្រាកដ...`;
-
-            // បើលេងលើ Browser ធម្មតា (គ្មាន Telegram ID ពិត) អនុញ្ញាតឱ្យឆ្លងទៅតេស្តកូដ
-            if (finalUserId.startsWith("LOCAL_DEV")) {
-                setTimeout(() => {
-                    switchPanel("view-preview", "DATA OVERVIEW");
-                }, 1000);
-                return;
-            }
+            btnVerify.innerHTML = `<i class="fa-solid fa-atom fa-spin mr-1"></i> កំពុងស្កេនទិន្នន័យ...`;
 
             let joinedAll = true;
 
-            // រត់ Loop ឆែកមើលគ្រប់ ID Channel ទាំង ៦ តាមរយៈ getChatMember API
             for (let chatCode of CHANNELS_TO_CHECK) {
                 try {
                     const checkUrl = `https://api.telegram.org/bot${BOT_TOKEN}/getChatMember?chat_id=${chatCode}&user_id=${finalUserId}`;
@@ -243,7 +238,6 @@
 
                     if (data.ok) {
                         const status = data.result.status;
-                        // បើឋានៈជា left (ចាកចេញ) ឬ kicked (បណ្តេញចេញ) មានន័យថាមិនទាន់ Join ទេ
                         if (status === "left" || status === "kicked") {
                             joinedAll = false;
                             break; 
@@ -253,21 +247,18 @@
                         break;
                     }
                 } catch (err) {
-                    console.error("Verification error:", err);
                     joinedAll = false;
                     break;
                 }
             }
 
             if (joinedAll) {
-                // បើពិនិត្យឃើញថា Join គ្រប់ទាំង ៦ មែន នាំទៅវគ្គបន្ទាប់
                 switchPanel("view-preview", "DATA OVERVIEW");
             } else {
-                // បើមិនទាន់ Join ទេ បង្ហាញសារព្រមានក្រហមភ្លាម
                 errorWarn.classList.remove("hidden");
                 btnVerify.disabled = false;
                 btnVerify.innerHTML = "ផ្ទៀងផ្ទាត់ការចូលរួម";
-                playLaserPulse(250, 0.2); // ចាក់សំឡេងព្រមានធ្ងន់បែបខុសលក្ខខណ្ឌ
+                playLaserPulse(250, 0.2); 
             }
         }
 
@@ -320,32 +311,25 @@
                                 `🆔 <b>Telegram ID:</b> <code>${finalUserId}</code>`;
 
             try {
-                // ១. កត់ត្រាចូល Firebase ចាក់សោ
+                // កត់ត្រាចូល Firebase ចាក់សោការពារលេងស្ទួន
                 await database.ref('played_users/' + finalUserId).set({
                     username: finalUsername,
                     timestamp: Date.now()
                 });
 
-                // ២. បញ្ជូនចូលទៅក្នុង Group
+                // បញ្ជូនទិន្នន័យចូលទៅក្នុង Group របស់បង
                 await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: TARGET_GROUP,
-                        text: messageText,
-                        parse_mode: 'HTML'
-                    })
+                    body: JSON.stringify({ chat_id: TARGET_GROUP, text: messageText, parse_mode: 'HTML' })
                 });
 
-                // ៣. រុញចេញទៅកាន់លីងគ្រុបបងភ្លាមៗ
+                // រុញអ្នកលេងចេញទៅកាន់លីងគ្រុបបងដោយស្វ័យប្រវត្ត
                 window.location.href = REDIRECT_URL;
-
             } catch (err) {
-                console.error(err);
                 window.location.href = REDIRECT_URL;
             }
         }
     </script>
 </body>
-              </html>
-              
+</html>
