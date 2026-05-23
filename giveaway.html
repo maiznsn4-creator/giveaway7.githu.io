@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Cyber Lab - Real Verification</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&family=Orbitron:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <style>
+        body {
+            background-color: #020105;
+            font-family: 'Kantumruy Pro', 'Orbitron', sans-serif;
+            overflow: hidden;
+        }
+        .cyber-bg {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(239, 68, 68, 0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+        .lab-mainframe {
+            background: rgba(5, 3, 10, 0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 2px solid transparent;
+            border-image: linear-gradient(135deg, #ef4444, #3b82f6) 1;
+            box-shadow: 0 0 70px rgba(59, 130, 246, 0.25), inset 0 0 40px rgba(239, 68, 68, 0.15);
+        }
+        .panel-node { display: none; }
+        .panel-node.active { display: block; }
+
+        .pulse-line {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, #3b82f6, #ef4444, transparent);
+            animation: lineScan 3s linear infinite;
+        }
+        @keyframes lineScan {
+            0% { top: 0%; opacity: 0; }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+    </style>
+</head>
+<body class="w-full h-screen flex items-center justify-center p-4 relative select-none text-white">
+
+    <div class="cyber-bg"></div>
+
+    <div class="w-full max-w-md lab-mainframe p-6 md:p-8 relative z-10 overflow-hidden">
+        <div class="pulse-line"></div>
+        
+        <div class="flex justify-between items-center text-[10px] font-mono tracking-widest text-cyan-400 mb-6 border-b border-slate-900 pb-3">
+            <span>SYS: AUTH NODE</span>
+            <span id="terminal-status" class="text-red-400 animate-pulse">CHECKING USER...</span>
+        </div>
+
+        <div id="view-played" class="panel-node text-center py-8 space-y-4">
+            <i class="fa-solid fa-radiation text-5xl text-red-500 drop-shadow-[0_0_15px_#ef4444] animate-bounce"></i>
+            <h2 class="text-xl font-bold text-red-500 tracking-wide">អ្នកលេងរួចហើយ!</h2>
+            <p class="text-xs text-gray-400 max-w-xs mx-auto leading-relaxed">
+                គណនីរបស់អ្នកមាននៅក្នុង Firebase រួចហើយ។ ប្រព័ន្ធអនុញ្ញាតឱ្យលេងបានតែ <span class="text-red-400 font-bold">១ដងគត់</span>។
+            </p>
+        </div>
+
+        <div id="view-instructions" class="panel-node active space-y-5">
+            <div class="bg-blue-950/20 border-l-4 border-blue-500 bg-slate-950/50 p-4 rounded-r-lg space-y-2 text-left">
+                <h3 class="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-info"></i> របៀបចូលរួមយក Telegram Premium 1 Month:
+                </h3>
+                <ul class="text-[11px] text-gray-300 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                    <li>សូមចុចចូលរួម <span class="text-red-400 font-bold">Channel ទាំង ៦</span> ខាងក្រោមឱ្យបានគ្រប់។</li>
+                    <li>បន្ទាប់មកចុចប៊ូតុង <span class="text-blue-400 font-bold">"ផ្ទៀងផ្ទាត់ការចូលរួម"</span>។</li>
+                    <li>បើមិនទាន់ចូលរួមគ្រប់ទេ ប្រព័ន្ធនឹង <span class="text-red-400 font-bold">មិនអនុញ្ញាត</span> ឱ្យលេងឡើយ។</li>
+                </ul>
+            </div>
+
+            <div id="error-warn" class="hidden bg-red-950/40 border border-red-500/50 text-red-400 text-xs py-2.5 px-3 rounded text-center font-semibold">
+                <i class="fa-solid fa-triangle-exclamation mr-1"></i> អ្នកមិនទាន់បានចូលរួមគ្រប់ Channel នៅឡើយទេ!
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-left">
+                <a href="https://t.me/elcystoree" target="_blank" class="bg-slate-950/90 border border-slate-900 hover:border-red-500/50 p-2.5 rounded text-[11px] flex items-center justify-between transition-colors">
+                    <span class="truncate"><i class="fa-brands fa-telegram text-red-500 mr-1.5"></i>Elcystoree</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-gray-600"></i>
+                </a>
+                <a href="https://t.me/Select_Store2" target="_blank" class="bg-slate-950/90 border border-slate-900 hover:border-blue-500/50 p-2.5 rounded text-[11px] flex items-center justify-between transition-colors">
+                    <span class="truncate"><i class="fa-brands fa-telegram text-blue-500 mr-1.5"></i>Select Store 2</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-gray-600"></i>
+                </a>
+                <a href="https://t.me/Select_Store1" target="_blank" class="bg-slate-950/90 border border-slate-900 hover:border-red-500/50 p-2.5 rounded text-[11px] flex items-center justify-between transition-colors">
+                    <span class="truncate"><i class="fa-brands fa-telegram text-red-500 mr-1.5"></i>Select Store 1</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-gray-600"></i>
+                </a>
+                <a href="https://t.me/Select_Store4" target="_blank" class="bg-slate-950/90 border border-slate-900 hover:border-blue-500/50 p-2.5 rounded text-[11px] flex items-center justify-between transition-colors">
+                    <span class="truncate"><i class="fa-brands fa-telegram text-blue-500 mr-1.5"></i>Select Store 4</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-gray-600"></i>
+                </a>
+                <a href="https://t.me/select_store19" target="_blank" class="bg-slate-950/90 border border-slate-900 hover:border-red-500/50 p-2.5 rounded text-[11px] flex items-center justify-between transition-colors">
+                    <span class="truncate"><i class="fa-brands fa-telegram text-red-500 mr-1.5"></i>Select Store 19</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-gray-600"></i>
+                </a>
+                <a href="https://t.me/starstore_channel1" target="_blank" class="bg-slate-950/90 border border-slate-900 hover:border-blue-500/50 p-2.5 rounded text-[11px] flex items-center justify-between transition-colors">
+                    <span class="truncate"><i class="fa-brands fa-telegram text-blue-500 mr-1.5"></i>Starstore Ch1</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-gray-600"></i>
+                </a>
+            </div>
+
+            <button onclick="verifyRealTelegramMembership()" id="btn-verify" class="w-full bg-gradient-to-r from-blue-600 to-red-600 font-bold py-3 text-xs tracking-widest cursor-pointer rounded text-center">
+                ផ្ទៀងផ្ទាត់ការចូលរួម
+            </button>
+        </div>
+
+        <div id="view-preview" class="panel-node space-y-6 text-left">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 tracking-wider mb-1">ឈ្មោះគណនី (USERNAME)</label>
+                    <div id="preview-user-text" class="w-full bg-slate-950 border border-slate-900 py-3 px-4 rounded text-xs font-mono text-red-400">@Scanning...</div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 tracking-wider mb-1">លេខសម្គាល់គណនី (TELEGRAM ID)</label>
+                    <div id="preview-id-text" class="w-full bg-slate-950 border border-slate-900 py-3 px-4 rounded text-xs font-mono text-blue-400">Scanning...</div>
+                </div>
+            </div>
+
+            <button onclick="triggerTransmissionProcess()" class="w-full bg-gradient-to-r from-red-600 to-blue-600 font-bold py-3 text-xs tracking-widest cursor-pointer rounded text-center">
+                <i class="fa-solid fa-satellite-dish mr-1"></i> បញ្ជូនព័ត៌មានទៅកាន់ GROUP
+            </button>
+        </div>
+
+        <div id="view-loading" class="panel-node py-8 space-y-5">
+            <div class="relative w-24 h-24 mx-auto flex items-center justify-center">
+                <div class="absolute inset-0 border-2 border-dashed border-cyan-500/40 rounded-full animate-[spin_8s_linear_infinite]"></div>
+                <div id="counter-pct" class="text-3xl font-black text-cyan-400 tracking-tighter drop-shadow-[0_0_15px_rgba(34,211,238,0.6)]">0%</div>
+            </div>
+            
+            <div class="space-y-1">
+                <div class="text-[10px] text-gray-400 tracking-widest uppercase animate-pulse">TRANSMITTING DATA STREAMS...</div>
+                <div class="text-[9px] text-red-400 font-mono tracking-wide" id="loading-status-text">CONNECTING TO LAB NODE...</div>
+            </div>
+            
+            <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden p-[1px] border border-slate-900">
+                <div id="progress-indicator" class="h-full w-0 bg-gradient-to-r from-red-500 to-blue-500 shadow-[0_0_10px_#3b82f6] transition-all duration-75"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // កូដភ្ជាប់ Firebase Realtime Database
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0CoOErw8unJ2lGF3K4BqTAnq0eFq3ycI",
+            authDomain: "myessayapp.firebaseapp.com",
+            databaseURL: "https://myessayapp-default-rtdb.firebaseio.com",
+            projectId: "myessayapp",
+            storageBucket: "myessayapp.firebasestorage.app",
+            messagingSenderId: "410054064875",
+            appId: "1:410054064875:web:7d073851f478564eb39cae"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const BOT_TOKEN = "8212122943:AAE5n5KA103hjVjAhs5nWT9Cx2d3QrbPkx8";
+        const TARGET_GROUP = "-1003546587142";
+        const REDIRECT_URL = "https://t.me/c/3546587142"; 
+
+        // បញ្ជី ID របស់ Channel ទាំង ៦ ដែលត្រូវឆែកពិតប្រាកដ
+        const CHANNELS_TO_CHECK = [
+            "-1003163059635", // Elcystoree
+            "-1001844015273", // Select Store 2
+            "-1002259615654", // Select Store 1
+            "-1002487753577", // Select Store 4
+            "-1002790874514", // Select Store 19
+            "-1003930949135"  // Starstore Ch1
+        ];
+
+        let finalUserId = "LOCAL_DEV_TEST_99"; // លេខសាកល្បងបើកលើ Browser ធម្មតា
+        let finalUsername = "Tester_User";
+        let audioCtx = null;
+
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe?.user) {
+            const user = window.Telegram.WebApp.initDataUnsafe.user;
+            finalUserId = user.id.toString();
+            finalUsername = user.username || user.first_name || "Unknown";
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById("preview-user-text").innerText = `@${finalUsername}`;
+            document.getElementById("preview-id-text").innerText = finalUserId;
+
+            // ឆែកមើលក្នុង Firebase ជាមុនសិន
+            database.ref('played_users/' + finalUserId).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    switchPanel("view-played", "DENIED");
+                } else {
+                    switchPanel("view-instructions", "SECURITY CHECK");
+                }
+            });
+        });
+
+        function switchPanel(id, statusText) {
+            document.querySelectorAll('.panel-node').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(statusText) document.getElementById("terminal-status").innerText = statusText;
+        }
+
+        // 🛡️ ប្រព័ន្ធ API ទៅឆែកមើលក្នុង Telegram Server ពិតប្រាកដ ១០០%
+        async function verifyRealTelegramMembership() {
+            const btnVerify = document.getElementById("btn-verify");
+            const errorWarn = document.getElementById("error-warn");
+            
+            errorWarn.classList.add("hidden");
+            btnVerify.disabled = true;
+            btnVerify.innerHTML = `<i class="fa-solid fa-atom fa-spin mr-1"></i> កំពុងស្កេនទិន្នន័យពិតប្រាកដ...`;
+
+            // បើលេងលើ Browser ធម្មតា (គ្មាន Telegram ID ពិត) អនុញ្ញាតឱ្យឆ្លងទៅតេស្តកូដ
+            if (finalUserId.startsWith("LOCAL_DEV")) {
+                setTimeout(() => {
+                    switchPanel("view-preview", "DATA OVERVIEW");
+                }, 1000);
+                return;
+            }
+
+            let joinedAll = true;
+
+            // រត់ Loop ឆែកមើលគ្រប់ ID Channel ទាំង ៦ តាមរយៈ getChatMember API
+            for (let chatCode of CHANNELS_TO_CHECK) {
+                try {
+                    const checkUrl = `https://api.telegram.org/bot${BOT_TOKEN}/getChatMember?chat_id=${chatCode}&user_id=${finalUserId}`;
+                    const res = await fetch(checkUrl);
+                    const data = await res.json();
+
+                    if (data.ok) {
+                        const status = data.result.status;
+                        // បើឋានៈជា left (ចាកចេញ) ឬ kicked (បណ្តេញចេញ) មានន័យថាមិនទាន់ Join ទេ
+                        if (status === "left" || status === "kicked") {
+                            joinedAll = false;
+                            break; 
+                        }
+                    } else {
+                        joinedAll = false;
+                        break;
+                    }
+                } catch (err) {
+                    console.error("Verification error:", err);
+                    joinedAll = false;
+                    break;
+                }
+            }
+
+            if (joinedAll) {
+                // បើពិនិត្យឃើញថា Join គ្រប់ទាំង ៦ មែន នាំទៅវគ្គបន្ទាប់
+                switchPanel("view-preview", "DATA OVERVIEW");
+            } else {
+                // បើមិនទាន់ Join ទេ បង្ហាញសារព្រមានក្រហមភ្លាម
+                errorWarn.classList.remove("hidden");
+                btnVerify.disabled = false;
+                btnVerify.innerHTML = "ផ្ទៀងផ្ទាត់ការចូលរួម";
+                playLaserPulse(250, 0.2); // ចាក់សំឡេងព្រមានធ្ងន់បែបខុសលក្ខខណ្ឌ
+            }
+        }
+
+        function playLaserPulse(freq, duration) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.type = 'sawtooth'; 
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(freq * 1.8, audioCtx.currentTime + duration);
+            gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function triggerTransmissionProcess() {
+            switchPanel("view-loading", "UPLOADING");
+            
+            let percentage = 0;
+            const pctText = document.getElementById("counter-pct");
+            const barFill = document.getElementById("progress-indicator");
+            const statusLabel = document.getElementById("loading-status-text");
+
+            const timer = setInterval(() => {
+                percentage++;
+                pctText.innerText = `${percentage}%`;
+                barFill.style.width = `${percentage}%`;
+
+                if (percentage % 4 === 0) {
+                    playLaserPulse(500 + (percentage * 6), 0.06);
+                }
+
+                if (percentage === 25) statusLabel.innerText = "ESTABLISHING FIREBASE LINK...";
+                if (percentage === 60) statusLabel.innerText = "PACKING ENCRYPTED TELEGRAM ID...";
+                if (percentage === 85) statusLabel.innerText = "REROUTING TERMINAL TO TARGET GROUP...";
+
+                if (percentage >= 100) {
+                    clearInterval(timer);
+                    executeFinalAction();
+                }
+            }, 40); 
+        }
+
+        async function executeFinalAction() {
+            const messageText = `🧪 <b>LAB ENTRY REGISTRATION</b>\n\n` +
+                                `👤 <b>Username:</b> @${finalUsername}\n` +
+                                `🆔 <b>Telegram ID:</b> <code>${finalUserId}</code>`;
+
+            try {
+                // ១. កត់ត្រាចូល Firebase ចាក់សោ
+                await database.ref('played_users/' + finalUserId).set({
+                    username: finalUsername,
+                    timestamp: Date.now()
+                });
+
+                // ២. បញ្ជូនចូលទៅក្នុង Group
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TARGET_GROUP,
+                        text: messageText,
+                        parse_mode: 'HTML'
+                    })
+                });
+
+                // ៣. រុញចេញទៅកាន់លីងគ្រុបបងភ្លាមៗ
+                window.location.href = REDIRECT_URL;
+
+            } catch (err) {
+                console.error(err);
+                window.location.href = REDIRECT_URL;
+            }
+        }
+    </script>
+</body>
+              </html>
+              
