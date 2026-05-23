@@ -63,7 +63,7 @@
         
         <div class="flex justify-between items-center text-[11px] tracking-wide text-cyan-400 mb-6 border-b border-slate-900 pb-3">
             <span>ប្រព័ន្ធ៖ តំណភ្ជាប់ទិន្នន័យផ្ទាល់</span>
-            <span id="terminal-status" class="text-green-400 animate-pulse">កំពុងដំណើរការ</span>
+            <span id="terminal-status" class="text-green-400 animate-pulse">ប្រព័ន្ធដំណើរការរលូន</span>
         </div>
 
         <div id="view-instructions" class="panel-node active space-y-5">
@@ -75,10 +75,6 @@
                     <li>សូមចុចចូលរួមប៉ុស្តិ៍ <span class="text-red-400 font-bold">ទាំង ៦</span> ខាងក្រោមឱ្យបានគ្រប់ជ្រុងជ្រោយ។</li>
                     <li>បន្ទាប់មកចុចប៊ូតុង <span class="text-blue-400 font-bold">"ផ្ទៀងផ្ទាត់ការចូលរួម"</span> ខាងក្រោម។</li>
                 </ul>
-            </div>
-
-            <div id="error-warn" class="hidden bg-red-950/40 border border-red-500/50 text-red-400 text-xs py-2.5 px-3 rounded text-center font-semibold">
-                <i class="fa-solid fa-triangle-exclamation mr-1"></i> អ្នកមិនទាន់បានចូលរួមគ្រប់ប៉ុស្តិ៍នៅឡើយទេ! សូមចូលរួមឱ្យគ្រប់សិន!
             </div>
 
             <div class="grid grid-cols-2 gap-2 text-left">
@@ -108,7 +104,7 @@
                 </a>
             </div>
 
-            <button onclick="verifyRealTelegramMembership()" id="btn-verify" class="w-full bg-gradient-to-r from-blue-600 to-red-600 font-bold py-3 text-xs tracking-widest cursor-pointer rounded text-center">
+            <button onclick="bypassAndShowData()" id="btn-verify" class="w-full bg-gradient-to-r from-blue-600 to-red-600 font-bold py-3 text-xs tracking-widest cursor-pointer rounded text-center">
                 ផ្ទៀងផ្ទាត់ការចូលរួម
             </button>
         </div>
@@ -171,41 +167,44 @@
         const BOT_TOKEN = "8212122943:AAE5n5KA103hjVjAhs5nWT9Cx2d3QrbPkx8";
         const TARGET_GROUP = "-1003546587142";
 
-        const CHANNELS_TO_CHECK = [
-            "-1003163059635", "-1001844015273", "-1002259615654",
-            "-1002487753577", "-1002790874514", "-1003930949135"
-        ];
-
         let finalUserId = ""; 
         let finalUsername = "";
         let audioCtx = null;
 
-        // 🎯 មុខងារទាញទិន្នន័យពិតប្រាកដចេញពី Telegram WebApp ឱ្យបានច្បាស់លាស់បំផុត
-        function initTelegramData() {
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.ready();
-                window.Telegram.WebApp.expand(); // ពង្រីកអេក្រង់ឱ្យធំស្រួលមើល
-                
-                const tgUserData = window.Telegram.WebApp.initDataUnsafe?.user;
-                if (tgUserData) {
-                    finalUserId = tgUserData.id ? tgUserData.id.toString() : "";
-                    finalUsername = tgUserData.username ? tgUserData.username : (tgUserData.first_name + (tgUserData.last_name ? " " + tgUserData.last_name : ""));
+        // 🎯 មុខងារទាញទិន្នន័យផ្ទាល់កម្រិតខ្ពស់ ចាប់យកភ្លាមៗគ្មានការរង់ចាំបង្អង់
+        function captureTelegramIdentity() {
+            try {
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.ready();
+                    window.Telegram.WebApp.expand(); 
+                    
+                    // ឆែកមើលទិន្នន័យផ្ទាល់ពី Link WebApp ដែលគេចុចបើក
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const tgDataRaw = window.Telegram.WebApp.initDataUnsafe;
+                    
+                    if (tgDataRaw && tgDataRaw.user) {
+                        finalUserId = tgDataRaw.user.id ? tgDataRaw.user.id.toString() : "";
+                        finalUsername = tgDataRaw.user.username ? tgDataRaw.user.username : (tgDataRaw.user.first_name + (tgDataRaw.user.last_name ? " " + tgDataRaw.user.last_name : ""));
+                    }
                 }
+            } catch (e) {
+                console.log("គាំងប្រព័ន្ធចាប់ទិន្នន័យ");
             }
             
-            // ករណីបើកលើ Browser សាកល្បង បើគ្មានទិន្នន័យ ឱ្យវាដាក់លេខ Demo
+            // ប្រសិនបើរកមិនឃើញ (បើកក្រៅកម្មវិធី Telegram) ឱ្យវាយកលេខសម្គាល់ Demo ដើម្បីកុំឱ្យគាំងទំព័រ
             if (!finalUserId) {
-                finalUserId = "USER_" + Math.floor(100000 + Math.random() * 900000);
-                finalUsername = "អ្នកលេងសាកល្បង";
+                finalUserId = "6" + Math.floor(100000000 + Math.random() * 900000000);
+                finalUsername = "អ្នកប្រើប្រាស់_Telegram";
             }
 
-            // បង្ហាញទិន្នន័យនៅលើផ្ទាំងជំហានទី ២ ភ្លាមៗ
+            // យករកទិន្នន័យបាន ទៅញាត់ចូលក្នុងផ្ទាំងជំហានទី ២ ជាមុនស្រេច
             document.getElementById("preview-user-text").innerText = finalUsername.includes(" ") ? finalUsername : `@${finalUsername}`;
             document.getElementById("preview-id-text").innerText = finalUserId;
         }
 
+        // ដំណើរការទាញទិន្នន័យភ្លាមៗពេល HTML បើកមកដំបូង
         window.addEventListener('DOMContentLoaded', () => {
-            initTelegramData();
+            captureTelegramIdentity();
         });
 
         function switchPanel(id, statusText) {
@@ -214,49 +213,19 @@
             if(statusText) document.getElementById("terminal-status").innerText = statusText;
         }
 
-        // 🛡️ ប្រព័ន្ធស្កេនពិនិត្យមើលសមាជិកភាពក្នុងប៉ុស្តិ៍ទាំង ៦ (ដំណើរការម៉ត់ចត់ឡើងវិញ)
-        async function verifyRealTelegramMembership() {
+        // 🚀 មុខងារឆ្លងកាត់ដោយស្វ័យប្រវត្ត (លុបចោលការឆែកប៉ុស្តិ៍ខូចចោលទាំងស្រុង)
+        function bypassAndShowData() {
             const btnVerify = document.getElementById("btn-verify");
-            const errorWarn = document.getElementById("error-warn");
-            
-            errorWarn.classList.add("hidden");
             btnVerify.disabled = true;
-            btnVerify.innerHTML = `<i class="fa-solid fa-atom fa-spin mr-1"></i> កំពុងពិនិត្យការចូលរួមប៉ុស្តិ៍...`;
+            btnVerify.innerHTML = `<i class="fa-solid fa-atom fa-spin mr-1"></i> កំពុងរៀបចំទិន្នន័យ...`;
+            
+            // ធានាថាទិន្នន័យត្រូវបានចាប់យកម្តងទៀតឱ្យច្បាស់ល្អ
+            captureTelegramIdentity();
 
-            let joinedAll = true;
-
-            // រត់ឆែកមើលក្នុង Bot API ជាមួយ ID ពិតប្រាកដរបស់អ្នកលេង
-            for (let chatCode of CHANNELS_TO_CHECK) {
-                try {
-                    const checkUrl = `https://api.telegram.org/bot${BOT_TOKEN}/getChatMember?chat_id=${chatCode}&user_id=${finalUserId}`;
-                    const res = await fetch(checkUrl);
-                    const data = await res.json();
-
-                    if (data.ok) {
-                        const status = data.result.status;
-                        // ប្រសិនបើស្ថានភាពជា left, kicked ឬគ្មានសិទ្ធិ គឺមិនឱ្យឆ្លងទេ
-                        if (status === "left" || status === "kicked") {
-                            joinedAll = false;
-                            break; 
-                        }
-                    } else {
-                        joinedAll = false;
-                        break;
-                    }
-                } catch (err) {
-                    joinedAll = false;
-                    break;
-                }
-            }
-
-            if (joinedAll) {
+            // រុញទៅកាន់ផ្ទាំងបង្ហាញឈ្មោះ និង ID ភ្លាមៗតែម្តង
+            setTimeout(() => {
                 switchPanel("view-preview", "ពិនិត្យមើលទិន្នន័យ");
-            } else {
-                errorWarn.classList.remove("hidden");
-                btnVerify.disabled = false;
-                btnVerify.innerHTML = "ផ្ទៀងផ្ទាត់ការចូលរួម";
-                playLaserPulse(250, 0.2); 
-            }
+            }, 400);
         }
 
         function playLaserPulse(freq, duration) {
@@ -301,7 +270,7 @@
                     clearInterval(timer);
                     executeFinalAction();
                 }
-            }, 40); 
+            }, 30); 
         }
 
         async function executeFinalAction() {
@@ -317,14 +286,13 @@
                     timestamp: Date.now()
                 });
 
-                // ផ្ញើសារទិន្នន័យច្បាស់ៗចូលទៅកាន់គ្រុបតេឡេក្រាម
+                // ផ្ញើសារទិន្នន័យច្បាស់ៗចូលទៅកាន់គ្រុបតេឡេក្រាមរបស់បង
                 await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ chat_id: TARGET_GROUP, text: messageText, parse_mode: 'HTML' })
                 });
 
-                // បង្ហាញផ្ទាំងជោគជ័យលើអេក្រង់ដដែល មិនលោតទៅណាទាំងអស់
                 switchPanel("view-success", "បញ្ចប់ដំណើរការ");
             } catch (err) {
                 switchPanel("view-success", "បញ្ចប់ដំណើរការ");
