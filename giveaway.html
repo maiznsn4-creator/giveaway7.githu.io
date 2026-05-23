@@ -63,7 +63,7 @@
         
         <div class="flex justify-between items-center text-[11px] tracking-wide text-cyan-400 mb-6 border-b border-slate-900 pb-3">
             <span>ប្រព័ន្ធ៖ តំណភ្ជាប់ទិន្នន័យផ្ទាល់</span>
-            <span id="terminal-status" class="text-green-400 animate-pulse">បានភ្ជាប់ជោគជ័យ</span>
+            <span id="terminal-status" class="text-green-400 animate-pulse">កំពុងដំណើរការ</span>
         </div>
 
         <div id="view-instructions" class="panel-node active space-y-5">
@@ -78,7 +78,7 @@
             </div>
 
             <div id="error-warn" class="hidden bg-red-950/40 border border-red-500/50 text-red-400 text-xs py-2.5 px-3 rounded text-center font-semibold">
-                <i class="fa-solid fa-triangle-exclamation mr-1"></i> អ្នកមិនទាន់បានចូលរួមគ្រប់ប៉ុស្តិ៍នៅឡើយទេ! សូមពិនិត្យឡើងវិញ!
+                <i class="fa-solid fa-triangle-exclamation mr-1"></i> អ្នកមិនទាន់បានចូលរួមគ្រប់ប៉ុស្តិ៍នៅឡើយទេ! សូមចូលរួមឱ្យគ្រប់សិន!
             </div>
 
             <div class="grid grid-cols-2 gap-2 text-left">
@@ -116,12 +116,12 @@
         <div id="view-preview" class="panel-node space-y-6 text-left">
             <div class="space-y-4">
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-500 tracking-wider mb-1">ឈ្មោះគណនីរបស់អ្នកលេង</label>
-                    <div id="preview-user-text" class="w-full bg-slate-950 border border-slate-900 py-3 px-4 rounded text-xs font-mono text-red-400">កំពុងស្កេនឈ្មោះ...</div>
+                    <label class="block text-[11px] font-bold text-gray-500 tracking-wider mb-1">ឈ្មោះគណនីរបស់អ្នកលេង (USERNAME)</label>
+                    <div id="preview-user-text" class="w-full bg-slate-950 border border-slate-900 py-3 px-4 rounded text-xs font-mono text-red-400">កំពុងទាញយក...</div>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-500 tracking-wider mb-1">លេខសម្គាល់គណនីពិត</label>
-                    <div id="preview-id-text" class="w-full bg-slate-950 border border-slate-900 py-3 px-4 rounded text-xs font-mono text-blue-400">កំពុងស្កេនលេខសម្គាល់...</div>
+                    <label class="block text-[11px] font-bold text-gray-500 tracking-wider mb-1">លេខសម្គាល់គណនីពិត (TELEGRAM ID)</label>
+                    <div id="preview-id-text" class="w-full bg-slate-950 border border-slate-900 py-3 px-4 rounded text-xs font-mono text-blue-400">កំពុងទាញយក...</div>
                 </div>
             </div>
 
@@ -176,23 +176,36 @@
             "-1002487753577", "-1002790874514", "-1003930949135"
         ];
 
-        let finalUserId = "មិនស្គាល់លេខសម្គាល់"; 
-        let finalUsername = "មិនស្គាល់ឈ្មោះ";
+        let finalUserId = ""; 
+        let finalUsername = "";
         let audioCtx = null;
 
-        // ចាប់យកទិន្នន័យគណនីច្បាស់ៗពី Telegram WebApp SDK
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            if (window.Telegram.WebApp.initDataUnsafe?.user) {
-                const user = window.Telegram.WebApp.initDataUnsafe.user;
-                finalUserId = user.id.toString();
-                finalUsername = user.username ? user.username : (user.first_name + (user.last_name ? " " + user.last_name : ""));
+        // 🎯 មុខងារទាញទិន្នន័យពិតប្រាកដចេញពី Telegram WebApp ឱ្យបានច្បាស់លាស់បំផុត
+        function initTelegramData() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand(); // ពង្រីកអេក្រង់ឱ្យធំស្រួលមើល
+                
+                const tgUserData = window.Telegram.WebApp.initDataUnsafe?.user;
+                if (tgUserData) {
+                    finalUserId = tgUserData.id ? tgUserData.id.toString() : "";
+                    finalUsername = tgUserData.username ? tgUserData.username : (tgUserData.first_name + (tgUserData.last_name ? " " + tgUserData.last_name : ""));
+                }
             }
+            
+            // ករណីបើកលើ Browser សាកល្បង បើគ្មានទិន្នន័យ ឱ្យវាដាក់លេខ Demo
+            if (!finalUserId) {
+                finalUserId = "USER_" + Math.floor(100000 + Math.random() * 900000);
+                finalUsername = "អ្នកលេងសាកល្បង";
+            }
+
+            // បង្ហាញទិន្នន័យនៅលើផ្ទាំងជំហានទី ២ ភ្លាមៗ
+            document.getElementById("preview-user-text").innerText = finalUsername.includes(" ") ? finalUsername : `@${finalUsername}`;
+            document.getElementById("preview-id-text").innerText = finalUserId;
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById("preview-user-text").innerText = finalUsername.includes(" ") ? finalUsername : `@${finalUsername}`;
-            document.getElementById("preview-id-text").innerText = finalUserId;
+            initTelegramData();
         });
 
         function switchPanel(id, statusText) {
@@ -201,38 +214,38 @@
             if(statusText) document.getElementById("terminal-status").innerText = statusText;
         }
 
-        // 🛡️ ប្រព័ន្ធស្កេនពិនិត្យមើលសមាជិកភាពក្នុងប៉ុស្តិ៍ទាំង ៦ ពិតប្រាកដ
+        // 🛡️ ប្រព័ន្ធស្កេនពិនិត្យមើលសមាជិកភាពក្នុងប៉ុស្តិ៍ទាំង ៦ (ដំណើរការម៉ត់ចត់ឡើងវិញ)
         async function verifyRealTelegramMembership() {
             const btnVerify = document.getElementById("btn-verify");
             const errorWarn = document.getElementById("error-warn");
             
             errorWarn.classList.add("hidden");
             btnVerify.disabled = true;
-            btnVerify.innerHTML = `<i class="fa-solid fa-atom fa-spin mr-1"></i> កំពុងស្កេនទិន្នន័យពិតប្រាកដ...`;
+            btnVerify.innerHTML = `<i class="fa-solid fa-atom fa-spin mr-1"></i> កំពុងពិនិត្យការចូលរួមប៉ុស្តិ៍...`;
 
             let joinedAll = true;
 
-            if (finalUserId !== "មិនស្គាល់លេខសម្គាល់") {
-                for (let chatCode of CHANNELS_TO_CHECK) {
-                    try {
-                        const checkUrl = `https://api.telegram.org/bot${BOT_TOKEN}/getChatMember?chat_id=${chatCode}&user_id=${finalUserId}`;
-                        const res = await fetch(checkUrl);
-                        const data = await res.json();
+            // រត់ឆែកមើលក្នុង Bot API ជាមួយ ID ពិតប្រាកដរបស់អ្នកលេង
+            for (let chatCode of CHANNELS_TO_CHECK) {
+                try {
+                    const checkUrl = `https://api.telegram.org/bot${BOT_TOKEN}/getChatMember?chat_id=${chatCode}&user_id=${finalUserId}`;
+                    const res = await fetch(checkUrl);
+                    const data = await res.json();
 
-                        if (data.ok) {
-                            const status = data.result.status;
-                            if (status === "left" || status === "kicked") {
-                                joinedAll = false;
-                                break; 
-                            }
-                        } else {
+                    if (data.ok) {
+                        const status = data.result.status;
+                        // ប្រសិនបើស្ថានភាពជា left, kicked ឬគ្មានសិទ្ធិ គឺមិនឱ្យឆ្លងទេ
+                        if (status === "left" || status === "kicked") {
                             joinedAll = false;
-                            break;
+                            break; 
                         }
-                    } catch (err) {
+                    } else {
                         joinedAll = false;
                         break;
                     }
+                } catch (err) {
+                    joinedAll = false;
+                    break;
                 }
             }
 
