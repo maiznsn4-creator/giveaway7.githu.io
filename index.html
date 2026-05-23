@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Premium Red & Blue Gate</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@700&family=Orbitron:wght@900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #030206;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Orbitron', 'Kantumruy Pro', sans-serif;
+        }
+
+        /* ផ្ទៃ Background មានក្រឡាចត្រង្គបច្ចេកវិទ្យា (Cyber Grid Effect) */
+        .cyber-grid {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none;
+        }
+
+        /* ស៊ុមពន្លឺ Neon ព័ទ្ធជុំវិញអេក្រង់ */
+        .cyber-frame {
+            position: absolute;
+            inset: 16px;
+            border: 2px solid rgba(59, 130, 246, 0.15);
+            pointer-events: none;
+            z-index: 60;
+            box-shadow: inset 0 0 30px rgba(239, 68, 68, 0.08), 0 0 20px rgba(59, 130, 246, 0.1);
+        }
+        .cyber-corner {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            border-style: solid;
+            box-shadow: 0 0 15px currentColor;
+        }
+        .corner-red { border-color: #ef4444; color: #ef4444; }
+        .corner-blue { border-color: #3b82f6; color: #3b82f6; }
+
+        /* ផ្ទាំងទ្វារមន្ទីរពិសោធន៍កម្រិត Premium 3D (លេងពណ៌ក្រហម-ខៀវបែបកម្រិតខ្ពស់) */
+        .gate-container {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            z-index: 40;
+        }
+        .gate-door {
+            width: 50%;
+            height: 100%;
+            position: relative;
+            transition: transform 2.5s cubic-bezier(0.85, 0, 0.15, 1);
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .door-left {
+            left: 0;
+            background: linear-gradient(135deg, #1f0b0b 0%, #0d0404 50%, #030101 100%);
+            border-right: 6px solid #ef4444;
+            box-shadow: 25px 0 70px rgba(239, 68, 68, 0.35);
+        }
+        .door-right {
+            right: 0;
+            background: linear-gradient(225deg, #0b141f 0%, #04080d 50%, #010203 100%);
+            border-left: 6px solid #3b82f6;
+            box-shadow: -25px 0 70px rgba(59, 130, 246, 0.35);
+            justify-content: flex-end;
+        }
+        
+        /* ស្រទាប់ដែកថែបមន្ទីរពិសោធន៍អណ្តែតបែប 3D (Inner Heavy Panel) */
+        .door-panel-3d {
+            position: absolute;
+            inset: 40px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            background: rgba(2, 2, 4, 0.6);
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+        }
+        .door-left .door-panel-3d { border-right: 2px solid rgba(239, 68, 68, 0.3); }
+        .door-right .door-panel-3d { border-left: 2px solid rgba(59, 130, 246, 0.3); }
+
+        /* ឆ្នូតគែមព្រមានបែប Sci-Fi (Hazard Tech Stripes) */
+        .tech-lines {
+            position: absolute;
+            bottom: 40px;
+            width: 120px;
+            height: 8px;
+            background: repeating-linear-gradient(45deg, #1e293b, #1e293b 10px, transparent 10px, transparent 20px);
+            opacity: 0.4;
+        }
+        .door-left .tech-lines { right: 30px; }
+        .door-right .tech-lines { left: 30px; }
+
+        /* ផ្ទាំងបញ្ជាកណ្តាលអណ្តែត Glassmorphism ដ៏ប្រណីត */
+        .control-panel {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+            width: 390px;
+            background: rgba(5, 3, 10, 0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 2px solid transparent;
+            border-image: linear-gradient(to right, #ef4444, #3b82f6) 1;
+            border-radius: 1px; /* ប្រើរាងជ្រុងស្មើបែបយោធាទំនើប */
+            padding: 50px 30px;
+            box-shadow: 0 0 60px rgba(59, 130, 246, 0.25), 0 0 30px rgba(239, 68, 68, 0.15);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+        }
+
+        /* ឧបករណ៍បញ្ជាស្កេនក្រយៅដៃលោតពន្លឺ ដេញពណ៌ក្រហម-ខៀវ */
+        .scanner-box {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #150b1c 0%, #020104 100%);
+            border: 2px solid #ef4444;
+            border-radius: 50%;
+            margin: 40px auto 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.25), inset 0 0 15px rgba(239, 68, 68, 0.1);
+            transition: all 0.4s ease;
+        }
+        .scanner-box:hover {
+            box-shadow: 0 0 60px rgba(59, 130, 246, 0.7), inset 0 0 25px rgba(59, 130, 246, 0.4);
+            border-color: #3b82f6;
+            transform: scale(1.04);
+        }
+
+        /* របារខ្សែពន្លឺឡាស៊ែររត់កាត់ពេលកំពុងដំណើរការ */
+        .scan-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #3b82f6, #ef4444, transparent);
+            box-shadow: 0 0 25px #3b82f6, 0 0 50px #ef4444;
+            opacity: 0;
+            z-index: 45;
+            pointer-events: none;
+        }
+        .scanning .scan-line {
+            animation: moveScan 1.4s linear infinite;
+            opacity: 1;
+        }
+        @keyframes moveScan {
+            0% { top: 15%; }
+            50% { top: 85%; }
+            100% { top: 15%; }
+        }
+
+        /* គ្រាប់ខ្ចៅដែកលម្អបង្កើនភាពរឹងមាំ */
+        .rivet {
+            width: 10px;
+            height: 10px;
+            background: #1e293b;
+            border-radius: 50%;
+            position: absolute;
+            opacity: 0.5;
+            box-shadow: inset -1px -1px 3px rgba(0,0,0,0.9);
+        }
+
+        /* សកម្មភាពពេលប្រព័ន្ធបញ្ជាឱ្យបើកទ្វាររុញចេញ */
+        .gate-open .door-left { transform: translateX(-100%); }
+        .gate-open .door-right { transform: translateX(100%); }
+        .gate-open .control-panel { transform: translate(-50%, -50%) scale(0.3); opacity: 0; pointer-events: none; }
+    </style>
+</head>
+<body class="w-full h-screen relative select-none bg-[#020104]">
+
+    <!-- ក្រឡាចត្រង្គស៊ីប៊ែរពេញអេក្រង់ -->
+    <div class="cyber-grid"></div>
+
+    <!-- ស៊ុមឡាស៊ែរលម្អជ្រុង ក្រហម និង ខៀវ យ៉ាងស្អាត -->
+    <div class="cyber-frame">
+        <div class="cyber-corner top-0 left-0 border-t-4 border-l-4 corner-red"></div>
+        <div class="cyber-corner top-0 right-0 border-t-4 border-r-4 corner-blue"></div>
+        <div class="cyber-corner bottom-0 left-0 border-b-4 border-l-4 corner-blue"></div>
+        <div class="cyber-corner bottom-0 right-0 border-b-4 border-r-4 corner-red"></div>
+    </div>
+
+    <!-- ផ្ទៃខាងក្នុងបន្ទប់ ពេលទ្វារបើកផុត -->
+    <div class="absolute inset-0 flex flex-col items-center justify-center bg-[#040307] z-0">
+        <div class="text-center animate-pulse">
+            <i class="fa-solid fa-circle-nodes text-5xl text-blue-500 mb-3 drop-shadow-[0_0_15px_rgba(59,130,246,0.6)]"></i>
+            <div class="text-blue-400 font-bold tracking-[0.3em] text-xl">ACCESS GRANTED</div>
+        </div>
+    </div>
+
+    <!-- ប្រព័ន្ធទ្វារមន្ទីរពិសោធន៍ទាំងមូល -->
+    <div id="main-system" class="absolute inset-0 z-40">
+        
+        <!-- របារស្កេនដេញពណ៌ -->
+        <div class="scan-line"></div>
+
+        <!-- ផ្ទៃទ្វារក្រហម-ខៀវ 3D -->
+        <div class="gate-container">
+            <!-- ទ្វារឆ្វេង (Premium Red Steel) -->
+            <div class="gate-door door-left">
+                <div class="door-panel-3d"></div>
+                <div class="tech-lines"></div>
+                <div class="rivet top-8 left-8"></div>
+                <div class="rivet bottom-8 left-8"></div>
+                <div class="rivet top-1/2 left-8"></div>
+            </div>
+            <!-- ទ្វារស្តាំ (Premium Blue Steel) -->
+            <div class="gate-door door-right">
+                <div class="door-panel-3d"></div>
+                <div class="tech-lines"></div>
+                <div class="rivet top-8 right-8"></div>
+                <div class="rivet bottom-8 right-8"></div>
+                <div class="rivet top-1/2 right-8"></div>
+            </div>
+        </div>
+
+        <!-- ផ្ទាំងបញ្ជាកណ្តាលបែបលីនេអ៊ែរប្រណីត -->
+        <div class="control-panel">
+            <div class="py-1">
+                <h1 class="text-base font-black text-white tracking-wider leading-relaxed">
+                    STORE GIVEAWAY:<br>
+                    <span id="text-glow" class="text-red-500 text-lg block mt-1 font-extrabold drop-shadow-[0_0_10px_rgba(239,68,68,0.5)] transition-all duration-300">TELEGRAM PREMIUM 1 MONTH</span>
+                </h1>
+            </div>
+
+            <!-- ប៊ូតុងស្កេនមេដៃក្រហម-ខៀវ -->
+            <div class="scanner-box" onclick="activatePremiumGate()">
+                <div class="relative">
+                    <div class="absolute -inset-4 border border-dashed border-red-500/30 rounded-full animate-[spin_12s_linear_infinite]"></div>
+                    <i id="center-icon" class="fa-solid fa-fingerprint text-4xl text-red-500 transition-all duration-300"></i>
+                </div>
+            </div>
+            
+            <p class="text-xs text-gray-400 font-semibold mt-6 tracking-widest">PRESS TO ACCESS LAB</p>
+        </div>
+
+    </div>
+
+    <script>
+        let isActivated = false;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // ១. សំឡេងកុំព្យូទ័រស្កេនប្រេកង់ខ្ពស់ដិតច្បាស់
+        function playScanSound() {
+            initAudio();
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(480, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1150, audioCtx.currentTime + 1.4);
+            
+            gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.4);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.4);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.4);
+        }
+
+        // ២. ប្រព័ន្ធសំឡេងនិយាយសិប្បនិម្មិត AI (Welcome to Select store giveaway)
+        function playWelcomeSpeech() {
+            if ('speechSynthesis' in window) {
+                let speech = new SpeechSynthesisUtterance("Welcome to Select store giveaway");
+                speech.lang = 'en-US'; 
+                speech.rate = 0.95; // ល្បឿននិយាយបែបមនុស្សយន្តកុំព្យូទ័រ
+                speech.pitch = 0.85; // សំឡេងធ្ងន់ប្រណីត
+                speech.volume = 1.0; 
+                window.speechSynthesis.speak(speech);
+            }
+        }
+
+        // ៣. សំឡេងបាញ់ខ្យល់ប្លុំ Hydraulic ទ្វារដែកធ្ងន់ៗរបើកចេញ
+        function playDoorBlast() {
+            initAudio();
+            let dur = 2.5;
+            let bufferSize = audioCtx.sampleRate * dur;
+            let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            let data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            
+            let noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+            
+            let filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(850, audioCtx.currentTime);
+            filter.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + dur);
+            
+            let gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime); // សំឡេងខ្យល់ច្បាស់ល្អ
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+            
+            let bassOsc = audioCtx.createOscillator();
+            let bassGain = audioCtx.createGain();
+            bassOsc.type = 'triangle';
+            bassOsc.frequency.setValueAtTime(65, audioCtx.currentTime);
+            bassOsc.frequency.linearRampToValueAtTime(20, audioCtx.currentTime + dur);
+            bassGain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            bassGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+            
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            bassOsc.connect(bassGain);
+            bassGain.connect(audioCtx.destination);
+            
+            noise.start();
+            noise.stop(audioCtx.currentTime + dur);
+            bassOsc.start();
+            bassOsc.stop(audioCtx.currentTime + dur);
+        }
+
+        function activatePremiumGate() {
+            if (isActivated) return;
+            isActivated = true;
+
+            const mainSystem = document.getElementById("main-system");
+            const centerIcon = document.getElementById("center-icon");
+            const textGlow = document.getElementById("text-glow");
+
+            // ១. ចាប់ផ្តើមដំណើរការស្កេនឡាស៊ែរ
+            playScanSound();
+            
+            mainSystem.classList.add("scanning");
+            centerIcon.className = "fa-solid fa-atom fa-spin text-4xl text-blue-500 drop-shadow-[0_0_10px_rgba(59,130,246,0.8)]";
+            textGlow.className = "text-blue-500 text-lg block mt-1 font-extrabold drop-shadow-[0_0_12px_rgba(59,130,246,0.8)] scale-102 transition-all duration-300";
+
+            // ២. ទុកពេលស្កេន ១.៤ វិនាទី រួចទ្វាររបើកចេញភ្លាម
+            setTimeout(() => {
+                
+                // ៣. បន្លឺសំឡេងនិយាយស្វាគមន៍ និងសំឡេងបាញ់ខ្យល់មន្ទីរពិសោធន៍រួមគ្នា
+                playWelcomeSpeech();
+                playDoorBlast();
+                
+                mainSystem.classList.add("gate-open");
+                localStorage.setItem('gate_verified', 'true');
+
+                // ៤. រង់ចាំទ្វារបើកផុត ២.៥ វិនាទី រួចរត់ទៅកាន់ទំព័រ giveaway.html
+                setTimeout(() => {
+                    window.location.href = "giveaway.html";
+                }, 2550);
+
+            }, 1400);
+        }
+    </script>
+</body>
+                  </html>
+
